@@ -46,6 +46,14 @@ while True:
             print("Exiting Genre Input...")
             break
 
+        if not genre_input:
+            print("Genre cannot be empty!")
+            continue
+
+        elif genre_input.lower() not in [genre.lower() for genre in genre_list]:
+            print("Genre not available! Kindly recheck")
+            continue
+
         elif genre_input.lower() in [genre.lower() for genre in genre_list]:
             movie_vectors[movie_input][genre_dict[genre_input]] = 1
 
