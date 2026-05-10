@@ -1,3 +1,5 @@
+from traceback import print_tb
+
 import numpy as np
 
 genre_list = np.array([
@@ -18,5 +20,7 @@ genre_list = np.array([
     "Thriller"
 ])
 
+genre_dict = {}
+
 for i in range(len(genre_list)):
-    print(f"{i}: {genre_list[i]}")
+    genre_dict.update({genre_list[i]: i})
