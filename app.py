@@ -1,11 +1,11 @@
 import numpy as np
 
-def dot(a: list, b: list) -> int:
+def dot(v1: np.ndarray, v2: np.ndarray) -> int:
 
     dot_product = 0
 
     for j in range(len(a)):
-        dot_product += a[j] * b[j]
+        dot_product += v1[j] * v2[j]
 
     return dot_product
 
