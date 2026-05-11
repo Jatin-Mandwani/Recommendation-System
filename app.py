@@ -1,5 +1,14 @@
 import numpy as np
 
+def dot(a: list, b: list) -> int:
+
+    dot_product = 0
+
+    for j in range(len(a)):
+        dot_product += a[j] * b[j]
+
+    return dot_product
+
 genre_list = np.array([
     "Action",
     "Adventure",
