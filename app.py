@@ -9,6 +9,11 @@ def dot(v1: np.ndarray, v2: np.ndarray) -> int:
 
     return dot_product
 
+def magnitude(v1: np.ndarray) -> float:
+
+    mod_value = (sum(component * component for component in v1)) ** 0.5
+    return mod_value
+
 genre_list = np.array([
     "Action",
     "Adventure",
