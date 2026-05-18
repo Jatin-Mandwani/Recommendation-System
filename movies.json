@@ -1,0 +1,21 @@
+{
+    "genre_list": [
+        "Action",
+        "Adventure",
+        "Superhero",
+        "Sci-Fi",
+        "Thriller",
+        "Crime",
+        "Mystery",
+        "Drama",
+        "Comedy",
+        "Romance",
+        "Musical",
+        "Family",
+        "Animation",
+        "Horror",
+        "Documentary"
+    ],
+    "genre_dict": {},
+    "movie_vectors": {}
+}
