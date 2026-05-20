@@ -75,7 +75,6 @@ def input_movies_and_genres():
     with open("movies.json", "w") as file:
         json.dump(data, file, indent=4)
 
-input_movies_and_genres()
 # Dot Product Function
 
 def dot(v1: list, v2: list) -> int:
@@ -89,7 +88,7 @@ def dot(v1: list, v2: list) -> int:
 
 # Magnitude Function
 
-def magnitude(v1: np.ndarray) -> float:
+def magnitude(v1: list) -> float:
 
     mod_value = (sum(component * component for component in v1)) ** 0.5
     return mod_value
@@ -99,18 +98,19 @@ def magnitude(v1: np.ndarray) -> float:
 def cosine_similarity(movie_name: str) -> dict:
 
     cos_values_list = []
+    ref_movie_dict = data["movie_vectors"]
 
-    if movie_name not in movie_vectors:
-        pass
+    if movie_name not in ref_movie_dict:
+        input_movies_and_genres()
 
-    input_movie_magnitude = magnitude(movie_vectors[movie_name])
-    for other_movie_name in movie_vectors:
+    input_movie_magnitude = magnitude(ref_movie_dict[movie_name])
+    for other_movie_name in ref_movie_dict:
         if other_movie_name == movie_name:
             continue
 
         else:
-            dot_product = dot(movie_vectors[movie_name], movie_vectors[other_movie_name])
-            other_movie_magnitude = magnitude(movie_vectors[other_movie_name])
+            dot_product = dot(ref_movie_dict[movie_name], ref_movie_dict[other_movie_name])
+            other_movie_magnitude = magnitude(ref_movie_dict[other_movie_name])
             cos_theta = (dot_product / (input_movie_magnitude * other_movie_magnitude))
             cos_values_list.append((other_movie_name, cos_theta))
 
