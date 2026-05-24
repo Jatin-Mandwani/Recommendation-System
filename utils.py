@@ -1,36 +1,63 @@
-import numpy as np
 import json
-from movies import genre_dict, movie_vectors, genre_list
+from copyreg import remove_extension
 
 with open("movies.json", "r") as mfile:
     data = json.load(mfile)
 # Genre List and Dict Updation
 
 def genre_updation():
-
     while True:
-        new_genre = input("\nEnter a new genre (or type 'exit' to quit): ").strip()
 
-        if not new_genre:
-            print("Genre cannot be empty")
-            continue
+        print("\nHow would you like to update the genre list: \n"
+              "1) Add genre to the genre list (Press 1)\n"
+              "2) Remove genre from the genre list 9 (Press 2)\n"
+              "3) Exit (Press 3)")
 
-        elif new_genre == "exit":
-            break
+        task_input = int(input("Enter here: "))
 
-        elif new_genre.lower() in [genre.lower() for genre in data["genre_list"]]:
-            print(f"The genre '{new_genre}' already exists")
-            continue
+        match task_input:
 
-        else:
-            data["genre_list"].append(new_genre)
+            case 1:
+                new_genre = input("\nEnter a new genre (or type 'exit' to quit): ").strip()
+
+                if not new_genre:
+                    print("Genre cannot be empty")
+                    continue
+
+                elif new_genre.lower() in [genre.lower() for genre in data["genre_list"]]:
+                    print(f"The genre '{new_genre}' already exists")
+                    continue
+
+                else:
+                    data["genre_list"].append(new_genre)
+                    print(f"You entered '{new_genre}' as a new genre")
+                    continue
+
+            case 2:
+                remove_genre = input("\nEnter the genre to be removed: ").strip()
+
+                if not remove_genre:
+                    print("Genre cannot be empty")
+                    continue
 
 
-    for i in range(len(data["genre_list"])):
-        data["genre_dict"].update({data["genre_list"][i]: i})
+                elif remove_genre.lower() not in [genre.lower() for genre in data["genre_list"]]:
+                    print(f"'{remove_genre}' already does not exist")
+                    continue
 
-    with open("movies.json", "w") as file:
-        json.dump(data, file, indent=4)
+                elif remove_genre.lower() in [genre.lower() for genre in data["genre_list"]]:
+                    data["genre_list"].remove(remove_genre)
+                    print(f"You removed '{remove_genre}' from the list")
+                    continue
+
+            case 3:
+                data["genre_dict"].clear()
+                for i in range(len(data["genre_list"])):
+                    data["genre_dict"].update({data["genre_list"][i]: i})
+
+                with open("movies.json", "w") as file:
+                    json.dump(data, file, indent=4)
+                break
 
 # Input handling for Movies and Genres
 
@@ -49,9 +76,10 @@ def input_movies_and_genres():
         else:
             zero_list = [0] * len(data["genre_list"])
             data["movie_vectors"].update({movie_input: zero_list})
+            print(f"You entered '{movie_input}' movie")
 
         while True:
-            genre_input = (input(f"Enter the genre that needs for the movie '{movie_input}' (or type 'exit' to quit): ")
+            genre_input = (input(f"Enter the genre of the movie '{movie_input}' (or type 'exit' to quit): ")
                            .strip())
 
             if genre_input.lower() == "exit":
@@ -62,23 +90,22 @@ def input_movies_and_genres():
                 print("Genre cannot be empty!")
                 continue
 
-            elif genre_input.lower() not in [genre.lower() for genre in data["genre_list"]]:
+            elif (genre_input.lower() != "exit") and genre_input.lower() not in [genre.lower() for genre in
+                                                                                 data["genre_list"]]:
                 print("Genre not available! Kindly recheck")
                 continue
 
             elif genre_input.lower() in [genre.lower() for genre in data["genre_list"]]:
-                for i in range(len(data["genre_list"])):
-                    data["genre_dict"].update({data["genre_list"][i]: i})
-
                 data["movie_vectors"][movie_input][data["genre_dict"][genre_input]] = 1
+                print(f"You entered '{genre_input}' genre to the movie '{movie_input}'")
 
-    with open("movies.json", "w") as file:
-        json.dump(data, file, indent=4)
+            with open("movies.json", "w") as file:
+                json.dump(data, file, indent=4)
+
 
 # Dot Product Function
 
 def dot(v1: list, v2: list) -> int:
-
     dot_product = 0
 
     for j in range(len(v1)):
@@ -86,17 +113,17 @@ def dot(v1: list, v2: list) -> int:
 
     return dot_product
 
+
 # Magnitude Function
 
 def magnitude(v1: list) -> float:
-
     mod_value = (sum(component * component for component in v1)) ** 0.5
     return mod_value
+
 
 # Cosine Similarity Function
 
 def cosine_similarity(movie_name: str) -> dict:
-
     cos_values_list = []
     ref_movie_dict = data["movie_vectors"]
 
