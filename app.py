@@ -41,6 +41,10 @@ def main_menu():
                 print("\nThank you for using me!\n")
                 break
 
+            case default:
+                print("Enter valid input!")
+                continue
+
 
 if __name__ == "__main__":
     main_menu()
