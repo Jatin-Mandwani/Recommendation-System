@@ -72,9 +72,11 @@ Output:
 ---------------------------------------------
        Movie Name       |       Score
 ---------------------------------------------
-Better Call Saul        |      0.9432
-Ozark                   |      0.9124
-Narcos                  |      0.8871
+        Movie 1         |       Score 1
+        Movie 2         |       Score 2
+        Movie 3         |       Score 3       
+        Movie 4         |       Score 4       
+        Movie 5         |       Score 5      
 ---------------------------------------------
 ```
 
