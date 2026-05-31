@@ -1,5 +1,4 @@
 import json
-from copyreg import remove_extension
 
 with open("movies.json", "r") as mfile:
     data = json.load(mfile)
@@ -10,7 +9,7 @@ def genre_updation():
 
         print("\nHow would you like to update the genre list: \n"
               "1) Add genre to the genre list (Press 1)\n"
-              "2) Remove genre from the genre list 9 (Press 2)\n"
+              "2) Remove genre from the genre list (Press 2)\n"
               "3) Exit (Press 3)")
 
         task_input = int(input("Enter here: "))
@@ -123,12 +122,20 @@ def magnitude(v1: list) -> float:
 
 # Cosine Similarity Function
 
-def cosine_similarity(movie_name: str) -> dict:
+def cosine_similarity(movie_name: str) -> dict | None:
     cos_values_list = []
     ref_movie_dict = data["movie_vectors"]
 
     if movie_name not in ref_movie_dict:
-        input_movies_and_genres()
+
+        print("Movie not found.")
+
+        choice = input("Would you like to add it? (y/n): ").lower()
+
+        if choice == "y":
+            input_movies_and_genres()
+
+        return None
 
     input_movie_magnitude = magnitude(ref_movie_dict[movie_name])
     for other_movie_name in ref_movie_dict:
