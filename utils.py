@@ -14,6 +14,13 @@ def rebuild_genre_dict(genre_list: list[str]) -> dict[str, int]:
 
 genre_dict = rebuild_genre_dict(data["genre_list"])
 
+def genre_lookup(genre: str, genre_list: list) -> str | None:
+    for item in genre_list:
+        if genre.lower() == item.lower():
+            return item
+
+    return None
+
 # Genre List and Dict Updation
 
 def genre_updation():
@@ -80,34 +87,41 @@ def input_movies_and_genres():
             print("Input cannot be empty!")
             continue
 
-        else:
-            zero_list = [0] * len(data["genre_list"])
-            data["movie_vectors"].update({movie_input: zero_list})
-            print(f"You entered '{movie_input}' movie")
+        elif movie_input in data["movie_vectors"]:
+            print(f"'{movie_input}' already exists!")
+            continue
+
+        zero_list = [0] * len(data["genre_list"])
+        print(f"You entered '{movie_input}' movie")
 
         while True:
             genre_input = (input(f"Enter the genre of the movie '{movie_input}' (or type 'exit' to quit): ")
                            .strip())
 
-            if genre_input.lower() == "exit":
-                print("Exiting Genre Input...")
-                break
-
             if not genre_input:
                 print("Genre cannot be empty!")
                 continue
 
-            elif (genre_input.lower() != "exit") and genre_input.lower() not in [genre.lower() for genre in
-                                                                                 data["genre_list"]]:
+            elif genre_input.lower() == "exit":
+                print("Exiting Genre Input...")
+                break
+
+            validated_genre = genre_lookup(genre_input, data["genre_list"])
+
+            if validated_genre is None:
                 print("Genre not available! Kindly recheck")
                 continue
 
-            elif genre_input.lower() in [genre.lower() for genre in data["genre_list"]]:
-                data["movie_vectors"][movie_input][genre_dict[genre_input]] = 1
-                print(f"You entered '{genre_input}' genre to the movie '{movie_input}'")
+            zero_list[genre_dict[validated_genre]] = 1
+            print(f"You entered '{validated_genre}' genre to the movie '{movie_input}'")
 
-            with open("movies.json", "w") as file:
-                json.dump(data, file, indent=4)
+        if all(genre_values == 0 for genre_values in zero_list):
+            print(f"{movie_input} cannot be saved as no genre was associated with it!")
+            continue
+
+        data["movie_vectors"][movie_input] = zero_list
+        with open("movies.json", "w") as file:
+            json.dump(data, file, indent=4)
 
 
 # Dot Product Function
