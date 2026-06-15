@@ -2,6 +2,18 @@ import json
 
 with open("movies.json", "r") as mfile:
     data = json.load(mfile)
+
+# Genre to Index Mapping in Dict
+
+def rebuild_genre_dict(genre_list: list[str]) -> dict[str, int]:
+
+    return {
+        genre: i
+        for i, genre in enumerate(genre_list)
+    }
+
+genre_dict = rebuild_genre_dict(data["genre_list"])
+
 # Genre List and Dict Updation
 
 def genre_updation():
@@ -50,10 +62,6 @@ def genre_updation():
                     continue
 
             case 3:
-                data["genre_dict"].clear()
-                for i in range(len(data["genre_list"])):
-                    data["genre_dict"].update({data["genre_list"][i]: i})
-
                 with open("movies.json", "w") as file:
                     json.dump(data, file, indent=4)
                 break
@@ -95,7 +103,7 @@ def input_movies_and_genres():
                 continue
 
             elif genre_input.lower() in [genre.lower() for genre in data["genre_list"]]:
-                data["movie_vectors"][movie_input][data["genre_dict"][genre_input]] = 1
+                data["movie_vectors"][movie_input][genre_dict[genre_input]] = 1
                 print(f"You entered '{genre_input}' genre to the movie '{movie_input}'")
 
             with open("movies.json", "w") as file:

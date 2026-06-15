@@ -16,7 +16,7 @@
         "Horror",
         "Documentary"
     ],
-    "genre_dict": {},
+
     "movie_vectors":  {
         "Breaking Bad": [0,0,0,0,1,1,0,1,0,0,0,0,0,0,0],
         "Better Call Saul": [0,0,0,0,0,1,0,1,0,0,0,0,0,0,0],
