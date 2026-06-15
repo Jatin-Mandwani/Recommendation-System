@@ -15,7 +15,16 @@ def main_menu():
               "3) Browse by Genre (Press 3) \n"
               "4) Exit (Press 4)")
 
-        option = int(input("\nEnter here: "))
+        try:
+            option = int(input("\nEnter here: "))
+
+        except ValueError:
+            print("Invalid Input! Please enter one of the given numbers")
+            continue
+
+        except KeyboardInterrupt:
+            print("Operation Cancelled!")
+            break
 
         match option:
             case 1:
@@ -63,7 +72,6 @@ def main_menu():
 
             case 3:
                 filtered_genre_list = []
-                filtered_genre_index = []
 
                 temp_dict = {
                     genre.lower(): i
@@ -120,7 +128,7 @@ def main_menu():
                 print("\nThank you for using me!\n")
                 break
 
-            case default:
+            case _:
                 print("Enter valid input!")
                 continue
 
