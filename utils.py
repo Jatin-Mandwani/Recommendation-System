@@ -1,7 +1,19 @@
 import json
 
-with open("movies.json", "r") as mfile:
-    data = json.load(mfile)
+# Saving content to JSON file
+
+def save_json_data(json_data: dict):
+    with open("movies.json", "w") as json_file:
+        json.dump(json_data, json_file, indent=4)
+
+# Loading content from JSON file
+
+def load_json_data() -> dict:
+    with open("movies.json", "r") as json_file:
+        return json.load(json_file)
+
+
+data = load_json_data()
 
 # Genre to Index Mapping in Dict
 
@@ -13,6 +25,8 @@ def rebuild_genre_dict(genre_list: list[str]) -> dict[str, int]:
     }
 
 genre_dict = rebuild_genre_dict(data["genre_list"])
+
+# Genre Case Sensitivity Handling
 
 def genre_lookup(genre: str, genre_list: list) -> str | None:
     for item in genre_list:
@@ -69,8 +83,7 @@ def genre_updation():
                     continue
 
             case 3:
-                with open("movies.json", "w") as file:
-                    json.dump(data, file, indent=4)
+                save_json_data(data)
                 break
 
 # Input handling for Movies and Genres
@@ -120,8 +133,7 @@ def input_movies_and_genres():
             continue
 
         data["movie_vectors"][movie_input] = zero_list
-        with open("movies.json", "w") as file:
-            json.dump(data, file, indent=4)
+        save_json_data(data)
 
 
 # Dot Product Function
