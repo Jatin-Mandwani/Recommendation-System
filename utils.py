@@ -35,6 +35,15 @@ def genre_lookup(genre: str, genre_list: list) -> str | None:
 
     return None
 
+# Movie/Show Name Case Sensitivity Handling
+
+def movie_lookup(movie_name: str, movie_dict: dict) -> str | None:
+    for item in movie_dict:
+        if movie_name.lower() == item.lower():
+            return item
+
+    return None
+
 # Genre List and Dict Updation
 
 def genre_updation():
@@ -56,8 +65,9 @@ def genre_updation():
                     print("Genre cannot be empty")
                     continue
 
-                elif new_genre.lower() in [genre.lower() for genre in data["genre_list"]]:
-                    print(f"The genre '{new_genre}' already exists")
+                existing_genre = genre_lookup(new_genre,data["genre_list"])
+                if existing_genre is not None:
+                    print(f"The genre '{existing_genre}' already exists")
                     continue
 
                 else:
@@ -72,14 +82,14 @@ def genre_updation():
                     print("Genre cannot be empty")
                     continue
 
-
-                elif remove_genre.lower() not in [genre.lower() for genre in data["genre_list"]]:
-                    print(f"'{remove_genre}' already does not exist")
+                if genre_lookup(remove_genre, data["genre_list"]) is None:
+                    print(f"'{remove_genre}' does not exist")
                     continue
 
-                elif remove_genre.lower() in [genre.lower() for genre in data["genre_list"]]:
-                    data["genre_list"].remove(remove_genre)
-                    print(f"You removed '{remove_genre}' from the list")
+                genre_to_remove = genre_lookup(remove_genre, data["genre_list"])
+                if genre_to_remove is not None:
+                    data["genre_list"].remove(genre_to_remove)
+                    print(f"You removed '{genre_to_remove}' from the list")
                     continue
 
             case 3:
@@ -92,16 +102,17 @@ def input_movies_and_genres():
     while True:
         movie_input = input("Enter movie name (or type 'exit' to quit): ").strip()
 
-        if movie_input.lower() == "exit":
-            print("Exiting Movie Input...")
-            break
-
-        elif not movie_input:
+        if not movie_input:
             print("Input cannot be empty!")
             continue
 
-        elif movie_input in data["movie_vectors"]:
-            print(f"'{movie_input}' already exists!")
+        elif movie_input.lower() == "exit":
+            print("Exiting Movie Input...")
+            break
+
+        existing_movie = movie_lookup(movie_input, data["movie_vectors"])
+        if existing_movie is not None:
+            print(f"'{existing_movie}' already exists!")
             continue
 
         zero_list = [0] * len(data["genre_list"])
@@ -120,7 +131,6 @@ def input_movies_and_genres():
                 break
 
             validated_genre = genre_lookup(genre_input, data["genre_list"])
-
             if validated_genre is None:
                 print("Genre not available! Kindly recheck")
                 continue
@@ -158,9 +168,10 @@ def magnitude(v1: list) -> float:
 
 def cosine_similarity(movie_name: str) -> dict | None:
     cos_values_list = []
-    ref_movie_dict = data["movie_vectors"]
 
-    if movie_name not in ref_movie_dict:
+    validated_movie = movie_lookup(movie_name, data["movie_vectors"])
+
+    if validated_movie is None:
 
         print("Movie not found.")
 
@@ -171,16 +182,15 @@ def cosine_similarity(movie_name: str) -> dict | None:
 
         return None
 
-    input_movie_magnitude = magnitude(ref_movie_dict[movie_name])
-    for other_movie_name in ref_movie_dict:
-        if other_movie_name == movie_name:
+    input_movie_magnitude = magnitude(data["movie_vectors"][validated_movie])
+    for other_movie_name in data["movie_vectors"]:
+        if other_movie_name == validated_movie:
             continue
 
-        else:
-            dot_product = dot(ref_movie_dict[movie_name], ref_movie_dict[other_movie_name])
-            other_movie_magnitude = magnitude(ref_movie_dict[other_movie_name])
-            cos_theta = (dot_product / (input_movie_magnitude * other_movie_magnitude))
-            cos_values_list.append((other_movie_name, cos_theta))
+        dot_product = dot(data["movie_vectors"][validated_movie], data["movie_vectors"][other_movie_name])
+        other_movie_magnitude = magnitude(data["movie_vectors"][other_movie_name])
+        cos_theta = (dot_product / (input_movie_magnitude * other_movie_magnitude))
+        cos_values_list.append((other_movie_name, cos_theta))
 
     cos_values_list.sort(key=lambda movie_tuple: movie_tuple[1], reverse=True)
     cos_values = dict(cos_values_list)
