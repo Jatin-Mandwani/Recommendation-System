@@ -47,6 +47,8 @@ def movie_lookup(movie_name: str, movie_dict: dict) -> str | None:
 # Genre List and Dict Updation
 
 def genre_updation():
+    global genre_dict
+
     while True:
 
         print("\nHow would you like to update the genre list: \n"
@@ -65,15 +67,15 @@ def genre_updation():
                     print("Genre cannot be empty")
                     continue
 
-                existing_genre = genre_lookup(new_genre,data["genre_list"])
+                existing_genre = genre_lookup(new_genre, data["genre_list"])
                 if existing_genre is not None:
                     print(f"The genre '{existing_genre}' already exists")
                     continue
 
-                else:
-                    data["genre_list"].append(new_genre)
-                    print(f"You entered '{new_genre}' as a new genre")
-                    continue
+                data["genre_list"].append(new_genre)
+                print(f"You entered '{new_genre}' as a new genre")
+                genre_dict = rebuild_genre_dict(data["genre_list"])
+                continue
 
             case 2:
                 remove_genre = input("\nEnter the genre to be removed: ").strip()
@@ -82,15 +84,15 @@ def genre_updation():
                     print("Genre cannot be empty")
                     continue
 
-                if genre_lookup(remove_genre, data["genre_list"]) is None:
+                genre_to_remove = genre_lookup(remove_genre, data["genre_list"])
+                if genre_to_remove is None:
                     print(f"'{remove_genre}' does not exist")
                     continue
 
-                genre_to_remove = genre_lookup(remove_genre, data["genre_list"])
-                if genre_to_remove is not None:
-                    data["genre_list"].remove(genre_to_remove)
-                    print(f"You removed '{genre_to_remove}' from the list")
-                    continue
+                data["genre_list"].remove(genre_to_remove)
+                print(f"You removed '{genre_to_remove}' from the list")
+                genre_dict = rebuild_genre_dict(data["genre_list"])
+                continue
 
             case 3:
                 save_json_data(data)
@@ -166,20 +168,12 @@ def magnitude(v1: list) -> float:
 
 # Cosine Similarity Function
 
-def cosine_similarity(movie_name: str) -> dict | None:
+def cosine_similarity(movie_name: str) -> list[tuple[str, float]] | None:
     cos_values_list = []
 
     validated_movie = movie_lookup(movie_name, data["movie_vectors"])
 
     if validated_movie is None:
-
-        print("Movie not found.")
-
-        choice = input("Would you like to add it? (y/n): ").lower()
-
-        if choice == "y":
-            input_movies_and_genres()
-
         return None
 
     input_movie_magnitude = magnitude(data["movie_vectors"][validated_movie])
@@ -193,5 +187,5 @@ def cosine_similarity(movie_name: str) -> dict | None:
         cos_values_list.append((other_movie_name, cos_theta))
 
     cos_values_list.sort(key=lambda movie_tuple: movie_tuple[1], reverse=True)
-    cos_values = dict(cos_values_list)
-    return cos_values
+
+    return cos_values_list

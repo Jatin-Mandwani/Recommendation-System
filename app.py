@@ -1,9 +1,4 @@
-from utils import genre_updation, input_movies_and_genres, cosine_similarity
-import json
-
-with open("movies.json", "r") as mfile:
-    data = json.load(mfile)
-
+from utils import data, genre_dict, genre_lookup, save_json_data, load_json_data, movie_lookup, cosine_similarity
 
 def main_menu():
     print("\n<-------------------- WELCOME TO THE RECOMMENDATION SYSTEM -------------------->\n")
@@ -31,55 +26,50 @@ def main_menu():
                 movie_name = input("Enter the movie name to get similar recommendations: ")
                 recommended_movies = cosine_similarity(movie_name)
                 if recommended_movies is None:
+                    print("Movie not found.")
                     continue
 
                 print("")
-                print("-" * 45)
-                print(f"{'Movie Name':^25}|{'Score':^20}")
-                print("-" * 45)
-                for name, score in list(recommended_movies.items())[0:5]:
-                    print(f"{name:^25}|{score:^20.4f}")
-                print("-" * 45)
+                print("-" * 60)
+                print(f"{'Movie Name':^30}|{'Score':^30}")
+                print("-" * 60)
+                for name, score in recommended_movies[0:5]:
+                    print(f"{name:^30}|{score:^30.4f}")
+                print("-" * 60)
                 print("")
                 continue
 
             case 2:
                 searched_movie = input("Enter movie name: ")
+                validated_movie = movie_lookup(searched_movie, data["movie_vectors"])
 
-                if searched_movie.lower() not in (keys.lower() for keys in data["movie_vectors"].keys()):
-                    print(f"Movie '{searched_movie}' not found!")
-
-                elif not searched_movie:
+                if not searched_movie:
                     print("Input movie cannot be empty!")
 
-                else:
-                    temp_dict = {}
-                    for i, genre_item in enumerate(data["genre_list"]):
-                        temp_dict.update({i: genre_item})
+                elif validated_movie is None:
+                    print(f"Movie '{searched_movie}' not found!")
 
-                    temp_genre_list = [
-                        temp_dict[i]
-                        for i, item in enumerate(data["movie_vectors"][searched_movie])
+                else:
+
+                    result_genre_list = [
+                        data["genre_list"][i]
+                        for i, item in enumerate(data["movie_vectors"][validated_movie])
                         if item == 1
                     ]
 
                     print("\nName: {}\n"
-                          "Genres:- \n{}".format(searched_movie,
-                                                 "\n".join("{}. {}".format(i + 1, temp_genre_list[i])
-                                                           for i, item in enumerate(temp_genre_list))))
+                          "Genres:- \n{}".format(validated_movie,
+                                                 "\n".join("{}. {}".format(i + 1, result_genre_list[i])
+                                                           for i, item in enumerate(result_genre_list))))
 
                 continue
 
             case 3:
                 filtered_genre_list = []
 
-                temp_dict = {
-                    genre.lower(): i
-                    for i, genre in enumerate(data["genre_list"])
-                }
-
                 while True:
                     filter_genre = input("Enter the genre to get filtered suggestions {or type 'exit' to quit): ")
+                    validated_genre = genre_lookup(filter_genre, data["genre_list"])
 
                     if not filter_genre:
                         print("Genre cannot be empty!")
@@ -88,30 +78,25 @@ def main_menu():
                     elif filter_genre.lower() == 'exit':
                         break
 
-                    elif filter_genre.lower() in (items.lower() for items in filtered_genre_list):
-                        print(f"Genre '{filter_genre}' already entered!")
-                        continue
-
-                    elif filter_genre.lower() not in temp_dict:
+                    elif validated_genre is None:
                         print(f"Genre '{filter_genre}' not found!")
                         continue
 
+                    elif validated_genre in filtered_genre_list:
+                        print(f"Genre '{validated_genre}' already entered!")
+                        continue
+
                     else:
-                        filtered_genre_list.append(filter_genre)
+                        filtered_genre_list.append(validated_genre)
 
                 if not filtered_genre_list:
                     print("No genres entered!")
                     continue
 
-                filtered_genre_index = [
-                    temp_dict[genre_item.lower()]
-                    for genre_item in filtered_genre_list
-                ]
-
                 matching_movies = [
                     movie
                     for movie, vectors in data["movie_vectors"].items()
-                    if all(vectors[index] == 1 for index in filtered_genre_index)
+                    if all(vectors[genre_dict[genre]] == 1 for genre in filtered_genre_list)
                 ]
 
                 if matching_movies:
