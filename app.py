@@ -1,4 +1,7 @@
-from utils import search_movie, filter_movies_by_genre, recommend_movies
+# Main File
+
+from recommendation import recommend_movies
+from movie_operations import search_movie, filter_movies_by_genre
 
 def main_menu():
     print("\n<-------------------- WELCOME TO THE RECOMMENDATION SYSTEM -------------------->\n")

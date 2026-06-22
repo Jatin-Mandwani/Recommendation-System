@@ -1,48 +1,7 @@
-import json
+# Movie Input and Vector Creation
 
-# Saving content to JSON file
-
-def save_json_data(json_data: dict):
-    with open("movies.json", "w") as json_file:
-        json.dump(json_data, json_file, indent=4)
-
-# Loading content from JSON file
-
-def load_json_data() -> dict:
-    with open("movies.json", "r") as json_file:
-        return json.load(json_file)
-
-
-data = load_json_data()
-
-# Genre to Index Mapping in Dict
-
-def rebuild_genre_dict(genre_list: list[str]) -> dict[str, int]:
-
-    return {
-        genre: i
-        for i, genre in enumerate(genre_list)
-    }
-
-# Genre Case Sensitivity Handling
-
-def genre_lookup(genre: str, genre_list: list) -> str | None:
-    for item in genre_list:
-        if genre.lower() == item.lower():
-            return item
-
-    return None
-
-# Movie/Show Name Case Sensitivity Handling
-
-def movie_lookup(movie_name: str, movie_dict: dict) -> str | None:
-    for item in movie_dict:
-        if movie_name.lower() == item.lower():
-            return item
-
-    return None
-
-# Movie name input
+from lookup import movie_lookup, genre_lookup
+from data_manager import data, save_json_data, rebuild_genre_dict
 
 def get_movie_name() -> str | None:
     while True:
@@ -64,7 +23,7 @@ def get_movie_name() -> str | None:
         print(f"You entered '{movie_name}'")
         return movie_name
 
-# Vector creation from Genres
+
 
 def get_movie_vector(movie_name: str) -> list:
     genre_dict = rebuild_genre_dict(data["genre_list"])
@@ -93,7 +52,6 @@ def get_movie_vector(movie_name: str) -> list:
     return binary_vector
 
 
-# Searching and Displaying Movie Details
 
 def search_movie() -> None:
     searched_movie = input("Enter movie name: ")
@@ -119,7 +77,7 @@ def search_movie() -> None:
                                          "\n".join("{}. {}".format(i + 1, genre)
                                                    for i, genre in enumerate(result_genre_list))))
 
-# Filtering Movies by Genres and display the results
+
 
 def filter_movies_by_genre() -> None:
     filtered_genre_list = []
@@ -166,68 +124,7 @@ def filter_movies_by_genre() -> None:
     else:
         print("No Movies/Shows Found!")
 
-# Adding Genre to the list
 
-def add_genre() -> None:
-    new_genre = input("\nEnter a new genre (or type 'exit' to quit): ").strip()
-
-    if not new_genre:
-        print("Genre cannot be empty")
-        return
-
-    existing_genre = genre_lookup(new_genre, data["genre_list"])
-    if existing_genre is not None:
-        print(f"The genre '{existing_genre}' already exists")
-        return
-
-    data["genre_list"].append(new_genre)
-    save_json_data(data)
-    print(f"You entered '{new_genre}' as a new genre")
-
-# Removing Genre from the list
-
-def remove_genre() -> None:
-    genre_input = input("\nEnter the genre to be removed: ").strip()
-
-    if not genre_input:
-        print("Genre cannot be empty")
-        return
-
-    genre_to_remove = genre_lookup(genre_input, data["genre_list"])
-    if genre_to_remove is None:
-        print(f"'{genre_input}' does not exist")
-        return
-
-    data["genre_list"].remove(genre_to_remove)
-    save_json_data(data)
-    print(f"You removed '{genre_to_remove}' from the list")
-
-# Genre List and Dict Updation
-
-def genre_updation() -> None:
-
-    while True:
-
-        print("\nHow would you like to update the genre list: \n"
-              "1) Add genre to the genre list (Press 1)\n"
-              "2) Remove genre from the genre list (Press 2)\n"
-              "3) Exit (Press 3)")
-
-        task_input = int(input("Enter here: "))
-
-        match task_input:
-
-            case 1:
-                add_genre()
-
-            case 2:
-                remove_genre()
-
-            case 3:
-                save_json_data(data)
-                break
-
-# Input handling for Movies and Genres
 
 def add_movies() -> None:
     while True:

@@ -1,5 +1,8 @@
 # Recommendation Engine
 
+from data_manager import data
+from lookup import movie_lookup
+
 def dot(v1: list, v2: list) -> int:
 
     return sum(
