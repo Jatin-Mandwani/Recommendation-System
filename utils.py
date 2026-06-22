@@ -24,8 +24,6 @@ def rebuild_genre_dict(genre_list: list[str]) -> dict[str, int]:
         for i, genre in enumerate(genre_list)
     }
 
-genre_dict = rebuild_genre_dict(data["genre_list"])
-
 # Genre Case Sensitivity Handling
 
 def genre_lookup(genre: str, genre_list: list) -> str | None:
@@ -44,10 +42,169 @@ def movie_lookup(movie_name: str, movie_dict: dict) -> str | None:
 
     return None
 
+# Movie name input
+
+def get_movie_name() -> str | None:
+    while True:
+        movie_name = input("Enter movie name (or type 'exit' to quit): ").strip()
+
+        if not movie_name:
+            print("Input cannot be empty!")
+            continue
+
+        elif movie_name.lower() == "exit":
+            print("Exiting Movie Input...")
+            return None
+
+        existing_movie = movie_lookup(movie_name, data["movie_vectors"])
+        if existing_movie is not None:
+            print(f"'{existing_movie}' already exists!")
+            continue
+
+        print(f"You entered '{movie_name}'")
+        return movie_name
+
+# Vector creation from Genres
+
+def get_movie_vector(movie_name: str) -> list:
+    genre_dict = rebuild_genre_dict(data["genre_list"])
+    binary_vector = [0] * len(data["genre_list"])
+
+    while True:
+        genre_input = (input(f"Enter the genre of the movie '{movie_name}' (or type 'exit' to quit): ")
+                       .strip())
+
+        if not genre_input:
+            print("Genre cannot be empty!")
+            continue
+
+        elif genre_input.lower() == "exit":
+            print("Exiting Genre Input...")
+            break
+
+        validated_genre = genre_lookup(genre_input, data["genre_list"])
+        if validated_genre is None:
+            print("Genre not available! Kindly recheck")
+            continue
+
+        binary_vector[genre_dict[validated_genre]] = 1
+        print(f"You entered '{validated_genre}' genre to the movie '{movie_name}'")
+
+    return binary_vector
+
+
+# Searching and Displaying Movie Details
+
+def search_movie() -> None:
+    searched_movie = input("Enter movie name: ")
+
+    if not searched_movie:
+        print("Input movie cannot be empty!")
+
+    else:
+        validated_movie = movie_lookup(searched_movie, data["movie_vectors"])
+        if validated_movie is None:
+            print(f"Movie '{searched_movie}' not found!")
+
+        else:
+
+            result_genre_list = [
+                data["genre_list"][i]
+                for i, item in enumerate(data["movie_vectors"][validated_movie])
+                if item == 1
+            ]
+
+            print("\nName: {}\n"
+                  "Genres:- \n{}".format(validated_movie,
+                                         "\n".join("{}. {}".format(i + 1, genre)
+                                                   for i, genre in enumerate(result_genre_list))))
+
+# Filtering Movies by Genres and display the results
+
+def filter_movies_by_genre() -> None:
+    filtered_genre_list = []
+    genre_dict = rebuild_genre_dict(data["genre_list"])
+
+    while True:
+        filter_genre = input("Enter the genre to get filtered suggestions {or type 'exit' to quit): ")
+
+        if not filter_genre:
+            print("Genre cannot be empty!")
+            continue
+
+        elif filter_genre.lower() == 'exit':
+            break
+
+        validated_genre = genre_lookup(filter_genre, data["genre_list"])
+
+        if validated_genre is None:
+            print(f"Genre '{filter_genre}' not found!")
+            continue
+
+        elif validated_genre in filtered_genre_list:
+            print(f"Genre '{validated_genre}' already entered!")
+            continue
+
+        else:
+            filtered_genre_list.append(validated_genre)
+
+    if not filtered_genre_list:
+        print("No genres entered!")
+        return
+
+    matching_movies = [
+        movie
+        for movie, vectors in data["movie_vectors"].items()
+        if all(vectors[genre_dict[genre]] == 1 for genre in filtered_genre_list)
+    ]
+
+    if matching_movies:
+        print("\n----------Movies/Shows based on the genres----------\n")
+
+        for i, movie in enumerate(matching_movies, start=1):
+            print(f"{i}) {movie}")
+    else:
+        print("No Movies/Shows Found!")
+
+# Adding Genre to the list
+
+def add_genre() -> None:
+    new_genre = input("\nEnter a new genre (or type 'exit' to quit): ").strip()
+
+    if not new_genre:
+        print("Genre cannot be empty")
+        return
+
+    existing_genre = genre_lookup(new_genre, data["genre_list"])
+    if existing_genre is not None:
+        print(f"The genre '{existing_genre}' already exists")
+        return
+
+    data["genre_list"].append(new_genre)
+    save_json_data(data)
+    print(f"You entered '{new_genre}' as a new genre")
+
+# Removing Genre from the list
+
+def remove_genre() -> None:
+    genre_input = input("\nEnter the genre to be removed: ").strip()
+
+    if not genre_input:
+        print("Genre cannot be empty")
+        return
+
+    genre_to_remove = genre_lookup(genre_input, data["genre_list"])
+    if genre_to_remove is None:
+        print(f"'{genre_input}' does not exist")
+        return
+
+    data["genre_list"].remove(genre_to_remove)
+    save_json_data(data)
+    print(f"You removed '{genre_to_remove}' from the list")
+
 # Genre List and Dict Updation
 
-def genre_updation():
-    global genre_dict
+def genre_updation() -> None:
 
     while True:
 
@@ -61,38 +218,10 @@ def genre_updation():
         match task_input:
 
             case 1:
-                new_genre = input("\nEnter a new genre (or type 'exit' to quit): ").strip()
-
-                if not new_genre:
-                    print("Genre cannot be empty")
-                    continue
-
-                existing_genre = genre_lookup(new_genre, data["genre_list"])
-                if existing_genre is not None:
-                    print(f"The genre '{existing_genre}' already exists")
-                    continue
-
-                data["genre_list"].append(new_genre)
-                print(f"You entered '{new_genre}' as a new genre")
-                genre_dict = rebuild_genre_dict(data["genre_list"])
-                continue
+                add_genre()
 
             case 2:
-                remove_genre = input("\nEnter the genre to be removed: ").strip()
-
-                if not remove_genre:
-                    print("Genre cannot be empty")
-                    continue
-
-                genre_to_remove = genre_lookup(remove_genre, data["genre_list"])
-                if genre_to_remove is None:
-                    print(f"'{remove_genre}' does not exist")
-                    continue
-
-                data["genre_list"].remove(genre_to_remove)
-                print(f"You removed '{genre_to_remove}' from the list")
-                genre_dict = rebuild_genre_dict(data["genre_list"])
-                continue
+                remove_genre()
 
             case 3:
                 save_json_data(data)
@@ -100,63 +229,30 @@ def genre_updation():
 
 # Input handling for Movies and Genres
 
-def input_movies_and_genres():
+def add_movies() -> None:
     while True:
-        movie_input = input("Enter movie name (or type 'exit' to quit): ").strip()
+        movie_name = get_movie_name()
 
-        if not movie_input:
-            print("Input cannot be empty!")
-            continue
-
-        elif movie_input.lower() == "exit":
-            print("Exiting Movie Input...")
+        if movie_name is None:
             break
 
-        existing_movie = movie_lookup(movie_input, data["movie_vectors"])
-        if existing_movie is not None:
-            print(f"'{existing_movie}' already exists!")
+        binary_vector = get_movie_vector(movie_name)
+
+        if all(genre_values == 0 for genre_values in binary_vector):
+            print(f"{movie_name} cannot be saved as no genre was associated with it!")
             continue
 
-        zero_list = [0] * len(data["genre_list"])
-        print(f"You entered '{movie_input}' movie")
-
-        while True:
-            genre_input = (input(f"Enter the genre of the movie '{movie_input}' (or type 'exit' to quit): ")
-                           .strip())
-
-            if not genre_input:
-                print("Genre cannot be empty!")
-                continue
-
-            elif genre_input.lower() == "exit":
-                print("Exiting Genre Input...")
-                break
-
-            validated_genre = genre_lookup(genre_input, data["genre_list"])
-            if validated_genre is None:
-                print("Genre not available! Kindly recheck")
-                continue
-
-            zero_list[genre_dict[validated_genre]] = 1
-            print(f"You entered '{validated_genre}' genre to the movie '{movie_input}'")
-
-        if all(genre_values == 0 for genre_values in zero_list):
-            print(f"{movie_input} cannot be saved as no genre was associated with it!")
-            continue
-
-        data["movie_vectors"][movie_input] = zero_list
+        data["movie_vectors"][movie_name] = binary_vector
         save_json_data(data)
-
 
 # Dot Product Function
 
 def dot(v1: list, v2: list) -> int:
-    dot_product = 0
 
-    for j in range(len(v1)):
-        dot_product += v1[j] * v2[j]
-
-    return dot_product
+    return sum(
+        a * b
+        for a, b in zip(v1, v2)
+    )
 
 
 # Magnitude Function
@@ -176,12 +272,13 @@ def cosine_similarity(movie_name: str) -> list[tuple[str, float]] | None:
     if validated_movie is None:
         return None
 
-    input_movie_magnitude = magnitude(data["movie_vectors"][validated_movie])
+    input_vector = data["movie_vectors"][validated_movie]
+    input_movie_magnitude = magnitude(input_vector)
     for other_movie_name in data["movie_vectors"]:
         if other_movie_name == validated_movie:
             continue
 
-        dot_product = dot(data["movie_vectors"][validated_movie], data["movie_vectors"][other_movie_name])
+        dot_product = dot(input_vector, data["movie_vectors"][other_movie_name])
         other_movie_magnitude = magnitude(data["movie_vectors"][other_movie_name])
         cos_theta = (dot_product / (input_movie_magnitude * other_movie_magnitude))
         cos_values_list.append((other_movie_name, cos_theta))
@@ -189,3 +286,21 @@ def cosine_similarity(movie_name: str) -> list[tuple[str, float]] | None:
     cos_values_list.sort(key=lambda movie_tuple: movie_tuple[1], reverse=True)
 
     return cos_values_list
+
+
+# Recommending Movie
+def recommend_movies() -> None:
+    movie_name = input("Enter the movie name to get similar recommendations: ").strip()
+    recommended_movies = cosine_similarity(movie_name)
+    if recommended_movies is None:
+        print("Movie not found.")
+        return
+
+    print()
+    print("-" * 60)
+    print(f"{'Movie Name':^30}|{'Score':^30}")
+    print("-" * 60)
+    for name, score in recommended_movies[0:5]:
+        print(f"{name:^30}|{score:^30.4f}")
+    print("-" * 60)
+    print()
