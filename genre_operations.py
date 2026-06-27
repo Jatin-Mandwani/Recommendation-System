@@ -1,13 +1,20 @@
 # Genre Operations
 
 from lookup import genre_lookup
-from data_manager import data, save_json_data
+from data_manager import save_json_data, load_json_data
+from typing import Iterable
 
 def add_genre() -> None:
+    data = load_json_data()
+
     new_genre = input("\nEnter a new genre (or type 'exit' to quit): ").strip()
 
     if not new_genre:
         print("Genre cannot be empty")
+        return
+
+    elif new_genre.lower() == "exit":
+        print("Exiting Genre Input...")
         return
 
     existing_genre = genre_lookup(new_genre, data["genre_list"])
@@ -22,6 +29,8 @@ def add_genre() -> None:
 
 
 def remove_genre() -> None:
+    data = load_json_data()
+
     genre_input = input("\nEnter the genre to be removed: ").strip()
 
     if not genre_input:
@@ -40,6 +49,7 @@ def remove_genre() -> None:
 
 
 def genre_updation() -> None:
+    data = load_json_data()
 
     while True:
 
@@ -61,3 +71,24 @@ def genre_updation() -> None:
             case 3:
                 save_json_data(data)
                 break
+
+
+
+def verify_genres(dataset_genre_list: Iterable[str], json_data_list: list) -> bool:
+
+    for genre in dataset_genre_list:
+        if genre not in json_data_list:
+            print(f"Genre '{genre}' not found!")
+            return False
+
+    return True
+
+
+
+def create_binary_vector(dataset_genre_list: Iterable[str], genre_dict, json_data) -> list:
+    binary_vector = [0] * len(json_data["genre_list"])
+
+    for genre in dataset_genre_list:
+        binary_vector[genre_dict[genre]] = 1
+
+    return binary_vector

@@ -12,9 +12,6 @@ def load_json_data() -> dict:
     with open("movies.json", "r") as json_file:
         return json.load(json_file)
 
-data = load_json_data()
-
-
 
 def rebuild_genre_dict(genre_list: list[str]) -> dict[str, int]:
 
