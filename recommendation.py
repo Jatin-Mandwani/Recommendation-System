@@ -1,7 +1,7 @@
 # Recommendation Engine
 
-from data_manager import data
-from lookup import movie_lookup
+from data_manager import load_json_data
+from lookup import find_matching_movies
 
 def dot(v1: list, v2: list) -> int:
 
@@ -19,17 +19,13 @@ def magnitude(v1: list) -> float:
 
 
 def cosine_similarity(movie_name: str) -> list[tuple[str, float]] | None:
+    data = load_json_data()
     cos_values_list = []
 
-    validated_movie = movie_lookup(movie_name, data["movie_vectors"])
-
-    if validated_movie is None:
-        return None
-
-    input_vector = data["movie_vectors"][validated_movie]
+    input_vector = data["movie_vectors"][movie_name]
     input_movie_magnitude = magnitude(input_vector)
     for other_movie_name in data["movie_vectors"]:
-        if other_movie_name == validated_movie:
+        if other_movie_name == movie_name:
             continue
 
         dot_product = dot(input_vector, data["movie_vectors"][other_movie_name])
@@ -44,12 +40,23 @@ def cosine_similarity(movie_name: str) -> list[tuple[str, float]] | None:
 
 
 def recommend_movies() -> None:
-    movie_name = input("Enter the movie name to get similar recommendations: ").strip()
-    recommended_movies = cosine_similarity(movie_name)
-    if recommended_movies is None:
-        print("Movie not found.")
-        return
+    data = load_json_data()
 
+    while True:
+        movie_name = input("Enter the movie name to get similar recommendations: ").strip()
+        if not movie_name:
+            print("Input movie cannot be empty!")
+            continue
+
+        movie_result = find_matching_movies(movie_name, data["movie_vectors"])
+
+        if movie_result is None:
+            continue
+
+        break
+
+
+    recommended_movies = cosine_similarity(movie_result)
     print()
     print("-" * 60)
     print(f"{'Movie Name':^30}|{'Score':^30}")

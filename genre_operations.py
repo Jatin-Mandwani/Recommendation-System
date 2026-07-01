@@ -4,8 +4,7 @@ from lookup import genre_lookup
 from data_manager import save_json_data, load_json_data
 from typing import Iterable
 
-def add_genre() -> None:
-    data = load_json_data()
+def add_genre(json_genre_list: list) -> None:
 
     new_genre = input("\nEnter a new genre (or type 'exit' to quit): ").strip()
 
@@ -17,19 +16,17 @@ def add_genre() -> None:
         print("Exiting Genre Input...")
         return
 
-    existing_genre = genre_lookup(new_genre, data["genre_list"])
+    existing_genre = genre_lookup(new_genre, json_genre_list)
     if existing_genre is not None:
         print(f"The genre '{existing_genre}' already exists")
         return
 
-    data["genre_list"].append(new_genre)
-    save_json_data(data)
+    json_genre_list.append(new_genre)
     print(f"You entered '{new_genre}' as a new genre")
 
 
 
-def remove_genre() -> None:
-    data = load_json_data()
+def remove_genre(json_genre_list) -> None:
 
     genre_input = input("\nEnter the genre to be removed: ").strip()
 
@@ -37,13 +34,12 @@ def remove_genre() -> None:
         print("Genre cannot be empty")
         return
 
-    genre_to_remove = genre_lookup(genre_input, data["genre_list"])
+    genre_to_remove = genre_lookup(genre_input, json_genre_list)
     if genre_to_remove is None:
         print(f"'{genre_input}' does not exist")
         return
 
-    data["genre_list"].remove(genre_to_remove)
-    save_json_data(data)
+    json_genre_list.remove(genre_to_remove)
     print(f"You removed '{genre_to_remove}' from the list")
 
 
@@ -58,15 +54,21 @@ def genre_updation() -> None:
               "2) Remove genre from the genre list (Press 2)\n"
               "3) Exit (Press 3)")
 
-        task_input = int(input("Enter here: "))
+
+        try:
+            task_input = int(input("Enter here: "))
+
+        except ValueError:
+            print("Please enter a valid number.")
+            continue
 
         match task_input:
 
             case 1:
-                add_genre()
+                add_genre(data["genre_list"])
 
             case 2:
-                remove_genre()
+                remove_genre(data["genre_list"])
 
             case 3:
                 save_json_data(data)
@@ -85,8 +87,8 @@ def verify_genres(dataset_genre_list: Iterable[str], json_data_list: list) -> bo
 
 
 
-def create_binary_vector(dataset_genre_list: Iterable[str], genre_dict, json_data) -> list:
-    binary_vector = [0] * len(json_data["genre_list"])
+def create_binary_vector(dataset_genre_list: Iterable[str], genre_dict, json_genre_list: list) -> list:
+    binary_vector = [0] * len(json_genre_list)
 
     for genre in dataset_genre_list:
         binary_vector[genre_dict[genre]] = 1

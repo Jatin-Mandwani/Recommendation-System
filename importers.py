@@ -20,7 +20,7 @@ def import_imdb_dataset(filename: str):
 
         for entry in movies_and_genres:
             total_entries += 1
-            title = entry["primaryTitle"]
+            title = f"{entry['primaryTitle']} ({entry['startYear']})"
 
             validated_title = movie_lookup(title, data["movie_vectors"])
             if validated_title is not None:
@@ -37,12 +37,10 @@ def import_imdb_dataset(filename: str):
                 invalid_genre += 1
                 continue
 
-            binary_movie_vector = create_binary_vector(dataset_genre, genre_dict, data)
+            binary_movie_vector = create_binary_vector(dataset_genre, genre_dict, data["genre_list"])
 
             data["movie_vectors"][title] = binary_movie_vector
             movies_shows_added += 1
-
-            print(f"{title}: {binary_movie_vector}")
 
         save_json_data(data)
 

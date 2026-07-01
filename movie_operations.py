@@ -1,9 +1,9 @@
 # Movie Input and Vector Creation
 
-from lookup import movie_lookup, genre_lookup
-from data_manager import data, save_json_data, rebuild_genre_dict
+from lookup import movie_lookup, genre_lookup, find_matching_movies
+from data_manager import load_json_data, save_json_data, rebuild_genre_dict
 
-def get_movie_name() -> str | None:
+def get_movie_name(data) -> str | None:
     while True:
         movie_name = input("Enter movie name (or type 'exit' to quit): ").strip()
 
@@ -25,7 +25,7 @@ def get_movie_name() -> str | None:
 
 
 
-def get_movie_vector(movie_name: str) -> list:
+def get_movie_vector(movie_name: str, data) -> list:
     genre_dict = rebuild_genre_dict(data["genre_list"])
     binary_vector = [0] * len(data["genre_list"])
 
@@ -54,37 +54,38 @@ def get_movie_vector(movie_name: str) -> list:
 
 
 def search_movie() -> None:
-    searched_movie = input("Enter movie name: ")
+    data = load_json_data()
+    searched_movie = input("Enter movie name: ").strip()
 
     if not searched_movie:
         print("Input movie cannot be empty!")
+        return
 
-    else:
-        validated_movie = movie_lookup(searched_movie, data["movie_vectors"])
-        if validated_movie is None:
-            print(f"Movie '{searched_movie}' not found!")
 
-        else:
+    validated_movie = find_matching_movies(searched_movie, data["movie_vectors"])
+    if validated_movie is None:
+        return
 
-            result_genre_list = [
-                data["genre_list"][i]
-                for i, item in enumerate(data["movie_vectors"][validated_movie])
-                if item == 1
-            ]
+    result_genre_list = [
+        data["genre_list"][i]
+        for i, item in enumerate(data["movie_vectors"][validated_movie])
+        if item == 1
+    ]
 
-            print("\nName: {}\n"
-                  "Genres:- \n{}".format(validated_movie,
-                                         "\n".join("{}. {}".format(i + 1, genre)
-                                                   for i, genre in enumerate(result_genre_list))))
+    print("\nName: {}\n"
+          "Genres:- \n{}".format(validated_movie,
+                                 "\n".join("{}. {}".format(i + 1, genre)
+                                           for i, genre in enumerate(result_genre_list))))
 
 
 
 def filter_movies_by_genre() -> None:
+    data = load_json_data()
     filtered_genre_list = []
     genre_dict = rebuild_genre_dict(data["genre_list"])
 
     while True:
-        filter_genre = input("Enter the genre to get filtered suggestions {or type 'exit' to quit): ")
+        filter_genre = input("Enter the genre to get filtered suggestions (or type 'exit' to quit): ")
 
         if not filter_genre:
             print("Genre cannot be empty!")
@@ -127,13 +128,14 @@ def filter_movies_by_genre() -> None:
 
 
 def add_movies() -> None:
+    data = load_json_data()
     while True:
-        movie_name = get_movie_name()
+        movie_name = get_movie_name(data)
 
         if movie_name is None:
             break
 
-        binary_vector = get_movie_vector(movie_name)
+        binary_vector = get_movie_vector(movie_name, data)
 
         if all(genre_values == 0 for genre_values in binary_vector):
             print(f"{movie_name} cannot be saved as no genre was associated with it!")
